@@ -4,6 +4,10 @@ import os
 import os.path as osp
 from copy import deepcopy
 
+import sys
+sys.path.append("/home/cvlab/workspace/hwpark/mmpretrain")
+sys.path.append("/workspace/mmpretrain")
+
 from mmengine.config import Config, ConfigDict, DictAction
 from mmengine.registry import RUNNERS
 from mmengine.runner import Runner
