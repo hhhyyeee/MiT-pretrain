@@ -3,16 +3,21 @@ import argparse
 import os
 import os.path as osp
 from copy import deepcopy
+import time
 
 import sys
-sys.path.append("/home/cvlab/workspace/hwpark/mmpretrain")
-sys.path.append("/workspace/mmpretrain")
+sys.path.append("/ssd_data1/hyewon/MiT-pretrain")
+# sys.path.append("/workspace/mmpretrain")
+
+from mmpretrain.engine.runners import CustomRunner
 
 from mmengine.config import Config, ConfigDict, DictAction
 from mmengine.registry import RUNNERS
 from mmengine.runner import Runner
 from mmengine.utils import digit_version
 from mmengine.utils.dl_utils import TORCH_VERSION
+
+DEBUG = True
 
 
 def parse_args():
@@ -68,6 +73,7 @@ def parse_args():
     # will pass the `--local-rank` parameter to `tools/train.py` instead
     # of `--local_rank`.
     parser.add_argument('--local_rank', '--local-rank', type=int, default=0)
+    parser.add_argument('--pid', type=int, default=0)
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
@@ -84,14 +90,29 @@ def merge_args(cfg, args):
 
     cfg.launcher = args.launcher
 
-    # work_dir is determined in this priority: CLI > segment in file > filename
+    # determine project id
+    if args.pid == 0:
+        cfg.prj_dirname = f"project-{args.pid}"
+    
+    # determine train_serial
+    timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
     if args.work_dir is not None:
-        # update configs according to CLI args if args.work_dir is not None
+        assert 'work_dirs' in args.work_dir, f"{args.work_dir} not in proper directory"
         cfg.work_dir = args.work_dir
-    elif cfg.get('work_dir', None) is None:
-        # use config filename as default work_dir if cfg.work_dir is None
-        cfg.work_dir = osp.join('./work_dirs',
-                                osp.splitext(osp.basename(args.config))[0])
+    else:
+        train_serial = f"{timestamp}" #editable
+        if DEBUG:
+            train_serial = f"debug_{train_serial}"
+        cfg.work_dir = osp.join('./work_dirs', cfg.prj_dirname, train_serial)
+
+    # # work_dir is determined in this priority: CLI > segment in file > filename
+    # if args.work_dir is not None:
+    #     # update configs according to CLI args if args.work_dir is not None
+    #     cfg.work_dir = args.work_dir
+    # elif cfg.get('work_dir', None) is None:
+    #     # use config filename as default work_dir if cfg.work_dir is None
+    #     cfg.work_dir = osp.join('./work_dirs',
+    #                             osp.splitext(osp.basename(args.config))[0])
 
     # enable automatic-mixed-precision training
     if args.amp is True:
@@ -152,7 +173,8 @@ def main():
     # build the runner from config
     if 'runner_type' not in cfg:
         # build the default runner
-        runner = Runner.from_cfg(cfg)
+        runner = CustomRunner.from_cfg(cfg)
+        # runner = Runner.from_cfg(cfg)
     else:
         # build customized runner from the registry
         # if 'runner_type' is set in the cfg

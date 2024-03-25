@@ -511,6 +511,7 @@ class MixVisionTransformer(BaseModule):
             x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
             outs.append(x)
 
+        a=1
         return outs
 
     def forward_features(self, x):
@@ -584,6 +585,7 @@ class MixVisionTransformer(BaseModule):
         x = x.reshape(B, H, W, -1).permute(0, 3, 1, 2).contiguous()
         outs.append(x)
 
+        a=1
         return outs
 
     def forward(self, x, module=4):

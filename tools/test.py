@@ -4,11 +4,16 @@ import os
 import os.path as osp
 from copy import deepcopy
 
+import sys
+sys.path.append('/ssd_data1/hyewon/MiT-pretrain')
+
 import mmengine
 from mmengine.config import Config, ConfigDict, DictAction
 from mmengine.evaluator import DumpResults
 from mmengine.registry import RUNNERS
 from mmengine.runner import Runner
+
+from mmpretrain.engine.runners.custom_runner import CustomRunner
 
 
 def parse_args():
@@ -172,7 +177,8 @@ def main():
     # build the runner from config
     if 'runner_type' not in cfg:
         # build the default runner
-        runner = Runner.from_cfg(cfg)
+        runner = CustomRunner.from_cfg(cfg)
+        # runner = Runner.from_cfg(cfg)
     else:
         # build customized runner from the registry
         # if 'runner_type' is set in the cfg

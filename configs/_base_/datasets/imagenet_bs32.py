@@ -28,7 +28,8 @@ train_dataloader = dict(
     num_workers=5,
     dataset=dict(
         type=dataset_type,
-        data_root='data/imagenet',
+        data_root='/ssd_data1/hyewon/data/ImageNet',
+        # data_root='data/imagenet',
         split='train',
         pipeline=train_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=True),
@@ -39,7 +40,8 @@ val_dataloader = dict(
     num_workers=5,
     dataset=dict(
         type=dataset_type,
-        data_root='data/imagenet',
+        data_root='/ssd_data1/hyewon/data/ImageNet',
+        # data_root='data/imagenet',
         split='val',
         pipeline=test_pipeline),
     sampler=dict(type='DefaultSampler', shuffle=False),

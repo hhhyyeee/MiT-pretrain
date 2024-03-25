@@ -40,6 +40,16 @@ class GlobalAveragePooling(nn.Module):
         elif isinstance(inputs, torch.Tensor):
             outs = self.gap(inputs)
             outs = outs.view(inputs.size(0), -1)
+        elif isinstance(inputs, list):      #!DEBUG (MiT)
+            a=1
+            inputs = (inputs[-1],)          #mit normally returns list of all 4 layer outputs
+                                            #here we use only the last one
+            assert isinstance(inputs[0], torch.Tensor), "mit last output is not tensor!"
+            outs = tuple([self.gap(x) for x in inputs])
+            outs = tuple([out.view(x.size(0), -1) for out, x in zip(outs, inputs)])
+            a=1
+
+            # outs = self
         else:
             raise TypeError('neck inputs should be tuple or torch.tensor')
         return outs
